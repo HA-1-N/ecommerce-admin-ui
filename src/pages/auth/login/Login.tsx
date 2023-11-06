@@ -1,6 +1,12 @@
-import { Button, Checkbox, Col, Form, Input, Typography } from 'antd';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { loginApi } from '@/api/auth.api';
+import { LoginProps } from '@/model/auth.model';
+import { Button, Checkbox, Col, Form, Input, Typography } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
+import { setLocalStorageId, setLocalStorageToken } from '@/utils/auth.util';
+import { useAppDispatch } from '@/app/hook';
+import { getCurrentUserByIdAsync } from '@/features/auth/authSlice';
+import { isRejected } from '@reduxjs/toolkit';
 
 type FieldType = {
   email?: string;
@@ -9,8 +15,25 @@ type FieldType = {
 };
 
 const Login = () => {
-  const onFinish = (values: FieldType) => {
-    console.log('Success:', values);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const onFinish = async (values: LoginProps) => {
+    await loginApi(values)
+      .then((res) => {
+        const data = res?.data;
+        const token = data?.token;
+        setLocalStorageToken(token);
+        setLocalStorageId(data?.id);
+        const currentUserRes = dispatch(getCurrentUserByIdAsync(data?.id));
+        if (isRejected(currentUserRes)) {
+          return;
+        }
+        navigate('/');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -74,11 +97,11 @@ const Login = () => {
                   </Form.Item>
                 </Col>
 
-                <Col span={32}>
+                {/* <Col span={32}>
                   <Form.Item<FieldType> name="remember" valuePropName="checked">
                     <Checkbox>Remember me</Checkbox>
                   </Form.Item>
-                </Col>
+                </Col> */}
 
                 <Form.Item>
                   <Button className="w-full" htmlType="submit">

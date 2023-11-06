@@ -9,6 +9,7 @@ import HTTP_ADMIN_SERVICE from './config/axios-admin.config';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { store } from './app/store';
 import { decreaseFetch, increaseFetch } from '@/features/app/appSlice';
+import { Provider } from 'react-redux';
 
 const actions = bindActionCreators({ increaseFetch, decreaseFetch }, store.dispatch);
 
@@ -22,8 +23,10 @@ setupAxiosInterceptors(
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <GlobalStyles>
-      <App />
-    </GlobalStyles>
+    <Provider store={store}>
+      <GlobalStyles>
+        <App />
+      </GlobalStyles>
+    </Provider>
   </React.StrictMode>,
 );
