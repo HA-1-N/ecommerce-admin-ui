@@ -6,6 +6,9 @@ import ErrorPage from '@/pages/404/ErrorPage';
 import Login from '@/pages/auth/login/Login';
 import { Layout } from 'antd';
 import LayoutApp from '@/pages/layout/LayoutApp';
+import AuthenticationRouter from '@/components/auth/AuthenticationRouter';
+import AuthorizationRouter from '@/components/auth/AuthorizationRouter';
+import { ROLE_CONSTANT } from '@/constants/auth.constants';
 
 const AppRouter = () => {
   const router = createBrowserRouter([
@@ -18,9 +21,19 @@ const AppRouter = () => {
     //   element: <Register />,
     // },
     {
+      path: '/404',
+      element: <ErrorPage />,
+    },
+    {
       path: '/',
       errorElement: <ErrorPage />,
-      element: <LayoutApp />,
+      element: (
+        <AuthenticationRouter>
+          <AuthorizationRouter roles={[ROLE_CONSTANT.ADMIN]}>
+            <LayoutApp />
+          </AuthorizationRouter>
+        </AuthenticationRouter>
+      ),
       children: [],
     },
   ]);
