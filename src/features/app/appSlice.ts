@@ -1,14 +1,16 @@
 import { RootState } from '@/app/store';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-interface CounterState {
+interface InititalStateProps {
   fetchCount: number;
   spinnerLoading: boolean;
+  notification: any;
 }
 
-const initialState: CounterState = {
+const initialState: InititalStateProps = {
   fetchCount: 0,
   spinnerLoading: false,
+  notification: null,
 };
 
 export const appSlice = createSlice({
@@ -35,10 +37,17 @@ export const appSlice = createSlice({
     incrementByAmount: (state, action: PayloadAction<number>) => {
       state.fetchCount += action.payload;
     },
+
+    openToast: (state, action) => {
+      return {
+        ...state,
+        notification: action.payload,
+      };
+    },
   },
 });
 
-export const { showSpinner, increaseFetch, decreaseFetch, incrementByAmount } = appSlice.actions;
+export const { showSpinner, increaseFetch, decreaseFetch, incrementByAmount, openToast } = appSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCount = (state: RootState) => state.app.fetchCount;

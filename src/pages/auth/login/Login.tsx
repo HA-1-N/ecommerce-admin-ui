@@ -7,6 +7,9 @@ import { setLocalStorageId, setLocalStorageToken } from '@/utils/auth.util';
 import { useAppDispatch } from '@/app/hook';
 import { getCurrentUserByIdAsync } from '@/features/auth/authSlice';
 import { isRejected } from '@reduxjs/toolkit';
+import { openToast } from '@/features/app/appSlice';
+import { RoleModel } from '@/model/role.model';
+import { ROLE_CONSTANT } from '@/constants/auth.constants';
 
 type FieldType = {
   email?: string;
@@ -20,16 +23,35 @@ const Login = () => {
 
   const onFinish = async (values: LoginProps) => {
     await loginApi(values)
-      .then((res) => {
+      .then(async (res) => {
         const data = res?.data;
         const token = data?.token;
         setLocalStorageToken(token);
         setLocalStorageId(data?.id);
-        const currentUserRes = dispatch(getCurrentUserByIdAsync(data?.id));
+        const currentUserRes = await dispatch(getCurrentUserByIdAsync(data?.id));
         if (isRejected(currentUserRes)) {
           return;
         }
         navigate('/');
+        const codeRoles = data?.roles?.map((item: RoleModel) => item?.code);
+
+        if (codeRoles?.includes(ROLE_CONSTANT.ADMIN)) {
+          dispatch(
+            openToast({
+              type: 'success',
+              message: 'Login success',
+              description: 'Welcome to admin page',
+            }),
+          );
+        } else {
+          dispatch(
+            openToast({
+              type: 'error',
+              message: 'Login error',
+              description: 'Error Page',
+            }),
+          );
+        }
       })
       .catch((err) => {
         console.log(err);
